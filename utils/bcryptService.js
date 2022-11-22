@@ -7,7 +7,7 @@ const encryptedData = async (data) => {
 }
 
 const compareData = async (userPass, passExist) => {
-  return await bcrypt.compare(userPass, passExist)
+  return await bcrypt.compare(userPass, passExist);
 }
 
 

@@ -3,6 +3,8 @@ const { userService } = require('../services/userService');
 const { encryptedData, compareData } = require('../utils/bcryptService');
 const { token } = require('../utils/jwtService');
 const User = require('../models/UserModel');
+const { sendEmail } = require('../services/sengrid');
+const { templateRegister } = require("../utils/templateEmails");
 
 const getAllUsers = async (req, res) => {
   try {
@@ -22,10 +24,15 @@ const createUser = async (req, res) => {
     const userSave = {
       ...req.body, 
       password: encryptPass,
-      isActive: true,
     }
     const newUser = await userService.saveUser(userSave);
     const JwtToken = token({id: newUser._id, role: newUser.role});
+    sendEmail({
+      subject: 'Bienvenidos a Rolling Code School 🚀', 
+      text: 'Gracias por registrarte', 
+      htmlMsg: templateRegister(newUser.name, newUser._id), 
+      userEmail: newUser.email,
+    })
     return res.status(201).json(JwtToken);
   } catch (e) {
     if (e.code === 11000) {
@@ -42,6 +49,9 @@ const login = async (req, res) => {
     const foundUser = await User.findOne({email})
     if (!foundUser) {
       return res.status(404).json('User not found');
+    }
+    if (!foundUser.isActive) {
+      return res.status(403).json('Not verfied account');
     }
     const correctPassword = await compareData(password, foundUser.password);
     if (!correctPassword) {
@@ -119,6 +129,23 @@ const updateUser = async (req, res) => {
   }
 }
 
+const activeAccount = async (req, res) => {
+  const { id } = req.params;
+  try {
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).json("ObjectId is not valid");
+    }
+    const activeUser = await User.findOneAndUpdate({_id: id }, {isActive: true}, { new: true });
+    if (activeUser) {
+      res.status(200).json(activeUser);
+    } else {
+      res.status(404).json("User not found");
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json('Internal Server Error');
+  }
+}
 
 module.exports = {
   getAllUsers,
@@ -127,4 +154,5 @@ module.exports = {
   deleteUser,
   getOneUser,
   updateUser,
+  activeAccount,
 };

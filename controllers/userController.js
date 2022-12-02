@@ -33,7 +33,7 @@ const createUser = async (req, res) => {
       htmlMsg: templateRegister(newUser.name, newUser._id), 
       userEmail: newUser.email,
     })
-    return res.status(201).json(JwtToken);
+    return res.status(201).json({token: JwtToken, userData: {name: newUser.name, role: newUser.role, isVerified: newUser.isActive}});
   } catch (e) {
     if (e.code === 11000) {
       return res.status(409).json('This email has already been registered');
@@ -58,8 +58,8 @@ const login = async (req, res) => {
       return res.status(400).json('Invalid Credentials');
     }
     const JwtToken = token({id: foundUser._id, role: foundUser.role});
-    res.status(200).json(JwtToken);
-  } catch (error) {
+    res.status(200).json({token: JwtToken, userData: {name: foundUser.name, role: foundUser.role, isVerified: foundUser.isActive}});
+  } catch (error) { 
     console.log(error);
     res.status(500).json('Internal Server Error');
   }

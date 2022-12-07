@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "name": "comision17i",
+  "builds": [
+    { "src": "app.js", "use": "@vercel/node" }
+  ],
+  "routes": [
+    { "src": "/(.*)", "dest": "/app.js" }
+  ]
+}

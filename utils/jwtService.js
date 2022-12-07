@@ -10,6 +10,7 @@ const verifiedToken = (token) => {
 }
 
 const getTokenToHeader = (req) => {
+  console
   if (
     req.headers.authorization &&
     req.headers.authorization.split(' ')[0] === 'Bearer'
